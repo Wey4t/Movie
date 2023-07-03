@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Movie App</string>
-    <string name="my_string">hourse</string>
+    <string name="app_name">My Application</string>
+    <string name="my_string">API key</string>
 </resources>
