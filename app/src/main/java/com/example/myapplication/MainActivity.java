@@ -15,8 +15,15 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     MovieAdapter movieAdp;
@@ -29,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.recycleView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(movieAdp);
-        movieAdp.notifyDataSetChanged();
+        movieAdp.setMoives(new ArrayList<>());
+//        movieAdp.notifyDataSetChanged();
     }
 
     public void launchSetting(View v){
@@ -39,16 +47,35 @@ public class MainActivity extends AppCompatActivity {
     }
     public void handleText(View v){
         TextView t = findViewById(R.id.input);
-        String url = t.getText().toString();
+        String url = "https://www.omdbapi.com/?apikey=3dfcd5a7&s="+t.getText().toString();
         RequestQueue queue = Volley.newRequestQueue(this);
-        StringRequest strRequest = new StringRequest(
-                Request.Method.GET,
+        JsonObjectRequest jsonObjectRequest  = new JsonObjectRequest(
                 url,
-                new Response.Listener<String>() {
+                new Response.Listener<JSONObject>() {
                     @Override
-                    public void onResponse(String response) {
-                        ((TextView)findViewById(R.id.source)).setText(response);
-
+                    public void onResponse(JSONObject response) {
+                        ArrayList<Movie> m = new ArrayList<>();
+                        try {
+                            JSONArray jsonArray = response.getJSONArray("Search");
+                            for (int i = 0 ; i < jsonArray.length(); ++i){
+                                JSONObject movie_json = jsonArray.getJSONObject(i);
+                                Movie newMoive = new Movie(
+                                        movie_json.getString("Title"),
+                                        movie_json.getString("Year"),
+                                        movie_json.getString("imdbID"),
+                                        movie_json.getString("Poster"),
+                                        movie_json.getString("Type")
+                                        );
+                                m.add(newMoive);
+                                Log.d("Title",movie_json.getString("Title"));
+                            }
+                        } catch (JSONException e) {
+                            throw new RuntimeException(e);
+                        }
+                        Log.d("sss",Integer.toString(response.length()));
+                        Log.d("ss",response.toString());
+                        movieAdp.setMoives(m);
+                        movieAdp.notifyDataSetChanged();
                     }
                 },
                 new Response.ErrorListener() {
@@ -58,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
-        queue.add(strRequest);
+        queue.add(jsonObjectRequest );
 
     }
 }
