@@ -1,14 +1,20 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
+import androidx.room.RoomDatabase;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -23,18 +29,30 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private MovieAdapter movieAdp;
     private RecyclerView recyclerView;
     private SearchView searchView;
-    private String APIkey;
+    private String key;
+    private RequestQueue queue;
+    private APIKeyDatabase apiKeyDatabase;
+    APIKeyDao apiKeyDao;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        apiKeyDatabase = Room.databaseBuilder(this,APIKeyDatabase.class,"apiKeyDatabase").allowMainThreadQueries().build();
+        apiKeyDao = apiKeyDatabase.getAPIKeyDao();
+        List<APIkey> keyL = apiKeyDao.getKey();
+        if(keyL.size() != 0){
+//            key = "3dfcd5a7";
+            key = keyL.get(0).get_key();
+        }
         searchView = (SearchView)findViewById(R.id.input);
         searchView.clearFocus();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
@@ -54,8 +72,31 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(movieAdp);
         movieAdp.setMoives(new ArrayList<>());
-        APIkey = "3dfcd5a7";
+        queue = Volley.newRequestQueue(this);
+        movieAdp.SetQueue(queue);
+        movieAdp.SetApiKey(key);
 //        movieAdp.notifyDataSetChanged();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInf = getMenuInflater();
+        menuInf.inflate(R.menu.menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.APIkey){
+            launchSetting(findViewById(R.id.APIkey));
+        } else if (id == R.id.SavedMovies){
+
+        } else{
+
+        }
+        return true;
+
     }
 
     public void launchSetting(View v){
@@ -66,8 +107,7 @@ public class MainActivity extends AppCompatActivity {
     public void handleText(String query){
         SearchView t = findViewById(R.id.input);
 
-        String url = "https://www.omdbapi.com/?apikey="+APIkey+"&s="+query;
-        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "https://www.omdbapi.com/?apikey="+key+"&s="+query;
         JsonObjectRequest jsonObjectRequest  = new JsonObjectRequest(
                 url,
                 new Response.Listener<JSONObject>() {
@@ -92,12 +132,14 @@ public class MainActivity extends AppCompatActivity {
                                     m.add(newMoive);
                                 }
                             }else{
-                                Toast toast = Toast.makeText(MainActivity.this,"Too many result",Toast.LENGTH_SHORT);
+                                Toast toast = Toast.makeText(MainActivity.this,response.getString("Error"),Toast.LENGTH_SHORT);
                                 toast.setGravity(Gravity.CENTER,0,0);
                                 toast.show();
                             }
                         } catch (JSONException e) {
+
                             throw new RuntimeException(e);
+
                         }
                         movieAdp.setMoives(m);
                         movieAdp.notifyDataSetChanged();
@@ -107,7 +149,14 @@ public class MainActivity extends AppCompatActivity {
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.e("tag","some error",error);
+                        Toast toast;
+                        if(error.networkResponse.statusCode==401){
+                            toast = Toast.makeText(MainActivity.this, "invaild API key", Toast.LENGTH_SHORT);
+                            toast.setGravity(Gravity.CENTER,0,0);
+                        }else{
+                            toast = Toast.makeText(MainActivity.this, "Check your internet connection", Toast.LENGTH_SHORT);
+                        }
+                        toast.show();
                     }
                 }
         );

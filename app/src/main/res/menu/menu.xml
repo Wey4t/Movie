@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/APIkey"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="APIkey"
+        app:showAsAction="never"></item>
+    <item
+        android:id="@+id/SavedMovies"
+        android:icon="@drawable/ic_launcher_foreground"
+        android:title="SavedMovies"
+        app:showAsAction="never"></item>
+</menu>

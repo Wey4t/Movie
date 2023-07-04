@@ -1,27 +1,50 @@
 package com.example.myapplication;
 
 import android.graphics.drawable.Drawable;
+import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder> {
-    ArrayList<Movie> movies;
+    public ArrayList<Movie> movies;
+    private String apiKey;
+    RequestQueue queue;
+    public void SetQueue(RequestQueue queue){
+         this.queue = queue;
+    }
+    public void SetApiKey(String key){
+        apiKey = key;
+    }
     public void setMoives(ArrayList<Movie> m){
         movies = m;
     }
@@ -57,18 +80,73 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder>
                                     }
                                 }).into(holder.movie_poster);
         holder.movie_title.setText(m.title);
+        holder.released.setText(m.released);
+        holder.plot.setText(m.plot);
+        holder.rating.setText(m.rating);
+        boolean isExpand = movies.get(position).getExpandable();
+        holder.expandableLayout.setVisibility(isExpand?View.VISIBLE : View.GONE);
     }
 
-    static class MovieHolder extends RecyclerView.ViewHolder {
-            TextView movie_title, year;
+     public class MovieHolder extends RecyclerView.ViewHolder {
+            TextView movie_title, year, released, plot, rating;
             ImageView movie_poster;
             View _v;
+            RelativeLayout expandableLayout;
+            public void AskforDetail(Movie m, View v, int i){
+                String url = "https://www.omdbapi.com/?apikey="+apiKey+"&i="+m.id;
+                JsonObjectRequest jsonObjectRequest  = new JsonObjectRequest(
+                        url,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    Log.d("finish",m.released+"+"+response.getString("Released")+" "+Integer.toString(i));
+                                    m.released = response.getString("Released");
+                                    m.rating = response.getString("imdbRating");
+                                    m.plot = response.getString("Plot");
+                                    notifyItemChanged(i);
+                                    m.setExpandable(!m.getExpandable());
+
+                                } catch (JSONException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        },
+                        new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.e("tag","some error",error);
+                            }
+                        }
+                );
+                queue.add(jsonObjectRequest);
+            }
             public MovieHolder(@NonNull View v){
                 super(v);
                 _v = v;
                 movie_title = v.findViewById(R.id.movie_title);
                 year = v.findViewById(R.id.year);
+                released = v.findViewById(R.id.Released);
+                rating = v.findViewById(R.id.imdbRating);
+                plot = v.findViewById(R.id.plot);
                 movie_poster = v.findViewById(R.id.movie_poster);
+                CardView movie_card =  v.findViewById(R.id.movie_card);
+                expandableLayout = v.findViewById(R.id.detail);
+                movie_card.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Movie m = movies.get(getAdapterPosition());
+                        Log.d("MSG","you click a movie!!"+m.title);
+                        if(!m.ch){
+                            m.ch = true;
+                            AskforDetail(m,v,getAdapterPosition());
+                        }else{
+                            notifyItemChanged(getAdapterPosition());
+                            m.setExpandable(!m.getExpandable());
+                        }
+
+                    }
+                });
             }
         }
 }
