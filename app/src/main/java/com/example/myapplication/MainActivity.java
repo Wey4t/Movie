@@ -8,8 +8,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -24,9 +25,10 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    MovieAdapter movieAdp;
-    RecyclerView recyclerView;
+    private MovieAdapter movieAdp;
+    private RecyclerView recyclerView;
     private SearchView searchView;
+    private String APIkey;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -48,10 +50,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         movieAdp = new MovieAdapter();
-        recyclerView = findViewById(R.id.recycleView);
+        recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(movieAdp);
         movieAdp.setMoives(new ArrayList<>());
+        APIkey = "3dfcd5a7";
 //        movieAdp.notifyDataSetChanged();
     }
 
@@ -63,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
     public void handleText(String query){
         SearchView t = findViewById(R.id.input);
 
-        String url = "https://www.omdbapi.com/?apikey=3dfcd5a7&s="+query;
+        String url = "https://www.omdbapi.com/?apikey="+APIkey+"&s="+query;
         RequestQueue queue = Volley.newRequestQueue(this);
         JsonObjectRequest jsonObjectRequest  = new JsonObjectRequest(
                 url,
@@ -73,11 +76,9 @@ public class MainActivity extends AppCompatActivity {
                         ArrayList<Movie> m = new ArrayList<>();
                         try {
                             Boolean isError = response.getBoolean("Response");
-                            Log.d("isError",Boolean.toString(isError));
 
                             if(isError){
                                 JSONArray jsonArray = response.getJSONArray("Search");
-                                Log.d("length",Integer.toString(jsonArray.length()));
 
                                 for (int i = 0 ; i < jsonArray.length(); ++i){
                                     JSONObject movie_json = jsonArray.getJSONObject(i);
@@ -89,14 +90,15 @@ public class MainActivity extends AppCompatActivity {
                                             movie_json.getString("Type")
                                     );
                                     m.add(newMoive);
-                                    Log.d("Title",movie_json.getString("Title"));
                                 }
+                            }else{
+                                Toast toast = Toast.makeText(MainActivity.this,"Too many result",Toast.LENGTH_SHORT);
+                                toast.setGravity(Gravity.CENTER,0,0);
+                                toast.show();
                             }
                         } catch (JSONException e) {
                             throw new RuntimeException(e);
                         }
-                        Log.d("sss",Integer.toString(response.length()));
-                        Log.d("ss",response.toString());
                         movieAdp.setMoives(m);
                         movieAdp.notifyDataSetChanged();
 
