@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -77,7 +78,18 @@ public class MainActivity extends AppCompatActivity {
         movieAdp.SetApiKey(key);
 //        movieAdp.notifyDataSetChanged();
     }
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        Log.d("msg","resume in main ！");
+        List<APIkey> l= apiKeyDao.getKey();
+        if( l.size() != 0){
+            key = l.get(0).get_key();
+            movieAdp.SetApiKey(key);
+        }
+        Log.d("msg","api:"+key);
 
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInf = getMenuInflater();
