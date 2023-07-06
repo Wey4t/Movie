@@ -17,8 +17,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkError;
+import com.android.volley.NoConnectionError;
+import com.android.volley.ParseError;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.ServerError;
+import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -27,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,6 +56,15 @@ public class MainActivity extends AppCompatActivity {
         apiKeyDatabase = Room.databaseBuilder(this, APIKeyDatabase.class,"apiKeyDatabase").allowMainThreadQueries().build();
         apiKeyDao = apiKeyDatabase.getAPIKeyDao();
         movieDao = apiKeyDatabase.getMovieDao();
+        movieAdp = new MovieAdapter();
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(movieAdp);
+        movieAdp.setMoives(new ArrayList<>());
+        movieAdp.setMovieDao(movieDao);
+        queue = Volley.newRequestQueue(this);
+        movieAdp.SetQueue(queue);
+        movieAdp.SetApiKey(key);
         List<APIkey> keyL = apiKeyDao.getKey();
         if(keyL.size() != 0){
 //            key = "3dfcd5a7";
@@ -67,15 +85,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        movieAdp = new MovieAdapter();
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setAdapter(movieAdp);
-        movieAdp.setMoives(new ArrayList<>());
-        movieAdp.setMovieDao(movieDao);
-        queue = Volley.newRequestQueue(this);
-        movieAdp.SetQueue(queue);
-        movieAdp.SetApiKey(key);
+
 //        movieAdp.notifyDataSetChanged();
     }
     @Override
@@ -84,6 +94,11 @@ public class MainActivity extends AppCompatActivity {
         Log.d("msg","resume in main ！");
         List<APIkey> l= apiKeyDao.getKey();
         if( l.size() != 0){
+            String new_k = l.get(0).get_key();
+            if( !key.equals(new_k)){
+                movieAdp.setMoives(new ArrayList<>());
+                movieAdp.notifyDataSetChanged();
+            }
             key = l.get(0).get_key();
             movieAdp.SetApiKey(key);
         }
@@ -167,17 +182,24 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Toast toast;
-                        if(error.networkResponse.statusCode==401){
+
+                        if(error instanceof TimeoutError ||
+                                error instanceof NoConnectionError){
+                            toast = Toast.makeText(MainActivity.this, "Check your internet connection", Toast.LENGTH_SHORT);
+                        }else if(error.networkResponse != null && error.networkResponse.statusCode==401){
                             toast = Toast.makeText(MainActivity.this, "invaild API key", Toast.LENGTH_SHORT);
                             toast.setGravity(Gravity.CENTER,0,0);
-                        }else{
-                            toast = Toast.makeText(MainActivity.this, "Check your internet connection", Toast.LENGTH_SHORT);
+                        }else {
+                            toast = Toast.makeText(MainActivity.this, "Error", Toast.LENGTH_SHORT);
                         }
                         toast.show();
                     }
                 }
         );
-        queue.add(jsonObjectRequest );
+        int Timeout = 1000;
+        RetryPolicy policy = new DefaultRetryPolicy(Timeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+        jsonObjectRequest.setRetryPolicy(policy);
+        queue.add(jsonObjectRequest);
 
     }
 }
