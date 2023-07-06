@@ -1,7 +1,12 @@
 package com.example.myapplication;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,7 +32,29 @@ public class SavedMoviesActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(mvAdp);
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInf = getMenuInflater();
+        menuInf.inflate(R.menu.menu,menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.APIkey){
+            Intent i = new Intent(this, SettingActivity.class);
+            startActivity(i);
+        } else if (id == R.id.SavedMovies){
+            Intent i = new Intent(this, SavedMoviesActivity.class);
+            startActivity(i);
+        } else{
+            Intent i = new Intent(this, MainActivity.class);
+            startActivity(i);
+        }
+        finish();
+        return true;
+    }
     @Override
     protected void onPostResume() {
         super.onPostResume();

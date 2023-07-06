@@ -17,15 +17,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.DefaultRetryPolicy;
-import com.android.volley.NetworkError;
+
 import com.android.volley.NoConnectionError;
-import com.android.volley.ParseError;
+
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.RetryPolicy;
-import com.android.volley.ServerError;
 import com.android.volley.TimeoutError;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -35,7 +33,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
     MovieDao movieDao;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
+        Log.d("create","main");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         apiKeyDatabase = Room.databaseBuilder(this, APIKeyDatabase.class,"apiKeyDatabase").allowMainThreadQueries().build();
@@ -72,6 +69,12 @@ public class MainActivity extends AppCompatActivity {
         }
         searchView = (SearchView)findViewById(R.id.input);
         searchView.clearFocus();
+        searchView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                searchView.setIconified(false);
+            }
+        });
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -121,8 +124,11 @@ public class MainActivity extends AppCompatActivity {
         } else if (id == R.id.SavedMovies){
             launchSavedMovies(findViewById(R.id.SavedMovies));
         } else{
-
+            Intent i = new Intent(this, MainActivity.class);
+            startActivity(i);
         }
+        finish();
+
         return true;
 
     }

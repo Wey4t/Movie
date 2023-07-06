@@ -1,11 +1,16 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -28,7 +33,29 @@ public class SettingActivity extends AppCompatActivity {
             t.setText(l.get(0).get_key());
         }
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInf = getMenuInflater();
+        menuInf.inflate(R.menu.menu,menu);
+        return true;
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.APIkey){
+            Intent i = new Intent(this, SettingActivity.class);
+            startActivity(i);
+        } else if (id == R.id.SavedMovies){
+            Intent i = new Intent(this, SavedMoviesActivity.class);
+            startActivity(i);
+        } else{
+            Intent i = new Intent(this, MainActivity.class);
+            startActivity(i);
+        }
+        finish();
+        return true;
+    }
     @Override
     protected void onPostResume() {
         super.onPostResume();
