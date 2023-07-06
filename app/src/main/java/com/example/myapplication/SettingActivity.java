@@ -17,6 +17,7 @@ public class SettingActivity extends AppCompatActivity {
     APIKeyDao apiKeyDao;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("create","create a setting act");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
         apiKeyDatabase = Room.databaseBuilder(this,APIKeyDatabase.class,"apiKeyDatabase").allowMainThreadQueries().build();

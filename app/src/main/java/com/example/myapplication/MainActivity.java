@@ -6,7 +6,6 @@ import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
-import androidx.room.RoomDatabase;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -31,7 +29,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private MovieAdapter movieAdp;
@@ -41,14 +38,15 @@ public class MainActivity extends AppCompatActivity {
     private RequestQueue queue;
     private APIKeyDatabase apiKeyDatabase;
     APIKeyDao apiKeyDao;
-
+    MovieDao movieDao;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        apiKeyDatabase = Room.databaseBuilder(this,APIKeyDatabase.class,"apiKeyDatabase").allowMainThreadQueries().build();
+        apiKeyDatabase = Room.databaseBuilder(this, APIKeyDatabase.class,"apiKeyDatabase").allowMainThreadQueries().build();
         apiKeyDao = apiKeyDatabase.getAPIKeyDao();
+        movieDao = apiKeyDatabase.getMovieDao();
         List<APIkey> keyL = apiKeyDao.getKey();
         if(keyL.size() != 0){
 //            key = "3dfcd5a7";
@@ -68,11 +66,13 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
         movieAdp = new MovieAdapter();
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(movieAdp);
         movieAdp.setMoives(new ArrayList<>());
+        movieAdp.setMovieDao(movieDao);
         queue = Volley.newRequestQueue(this);
         movieAdp.SetQueue(queue);
         movieAdp.SetApiKey(key);
@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
             key = l.get(0).get_key();
             movieAdp.SetApiKey(key);
         }
+        movieAdp.notifyDataSetChanged();
         Log.d("msg","api:"+key);
 
     }
@@ -103,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.APIkey){
             launchSetting(findViewById(R.id.APIkey));
         } else if (id == R.id.SavedMovies){
-
+            launchSavedMovies(findViewById(R.id.SavedMovies));
         } else{
 
         }
@@ -114,6 +115,10 @@ public class MainActivity extends AppCompatActivity {
     public void launchSetting(View v){
         // this is current activeity
         Intent i = new Intent(this, SettingActivity.class);
+        startActivity(i);
+    }
+    public void launchSavedMovies(View v){
+        Intent i = new Intent(this, SavedMoviesActivity.class);
         startActivity(i);
     }
     public void handleText(String query){

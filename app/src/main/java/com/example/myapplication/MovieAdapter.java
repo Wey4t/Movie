@@ -2,10 +2,10 @@ package com.example.myapplication;
 
 import android.graphics.drawable.Drawable;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -14,31 +14,31 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder> {
     public ArrayList<Movie> movies;
     private String apiKey;
     RequestQueue queue;
+    MovieDao movieDao;
+    public void setMovieDao(MovieDao m){
+        movieDao = m;
+    }
     public void SetQueue(RequestQueue queue){
          this.queue = queue;
     }
@@ -83,12 +83,20 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder>
         holder.released.setText(m.released);
         holder.plot.setText(m.plot);
         holder.rating.setText(m.rating);
+        ((View)holder.saveBtn).setEnabled(true);
+        if (movieDao.isMoiveExist(m.id) && !m.saved){
+            ((View)holder.saveBtn).setEnabled(false);
+        }
+        else if (m.saved){
+            holder.saveBtn.setText("Unsave");
+        }
         boolean isExpand = movies.get(position).getExpandable();
         holder.expandableLayout.setVisibility(isExpand?View.VISIBLE : View.GONE);
     }
 
      public class MovieHolder extends RecyclerView.ViewHolder {
             TextView movie_title, year, released, plot, rating;
+            Button saveBtn;
             ImageView movie_poster;
             View _v;
             RelativeLayout expandableLayout;
@@ -128,6 +136,22 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieHolder>
                 year = v.findViewById(R.id.year);
                 released = v.findViewById(R.id.Released);
                 rating = v.findViewById(R.id.imdbRating);
+                saveBtn = v.findViewById(R.id.save_movie);
+                saveBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Movie m = movies.get(getAdapterPosition());
+                        if (!m.saved){
+                            movieDao.Insert(m);
+                            ((View)saveBtn).setEnabled(false);
+                        }else{
+                            movieDao.deleteId(m.id);
+                            movies.remove(getAdapterPosition());
+                            notifyDataSetChanged();
+                        }
+
+                    }
+                });
                 plot = v.findViewById(R.id.plot);
                 movie_poster = v.findViewById(R.id.movie_poster);
                 CardView movie_card =  v.findViewById(R.id.movie_card);

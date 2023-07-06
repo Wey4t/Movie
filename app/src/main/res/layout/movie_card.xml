@@ -28,13 +28,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.3" />
+                app:layout_constraintGuide_percent="0.27" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout"
                 android:layout_width="240dp"
                 android:layout_height="110dp"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="4dp"
                 app:layout_constraintStart_toStartOf="@+id/guideline3"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -48,14 +48,14 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintVertical_bias="0.205" />
+                    app:layout_constraintVertical_bias="0.068" />
 
                 <TextView
                     android:id="@+id/year"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:layout_marginBottom="4dp"
+                    android:layout_marginBottom="24dp"
                     android:text="TextView"
                     android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -64,9 +64,10 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="78dp"
+                android:layout_height="104dp"
                 app:layout_constraintEnd_toStartOf="@+id/guideline3"
+                app:layout_constraintHorizontal_bias="0.484"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -74,9 +75,8 @@
                     android:id="@+id/movie_poster"
                     android:layout_width="72dp"
                     android:layout_height="96dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="4dp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     tools:srcCompat="@tools:sample/avatars" />
@@ -113,6 +113,19 @@
                 android:paddingLeft="20dp"
                 android:paddingRight="20dp"
                 android:text=""></TextView>
+
+            <Button
+                android:id="@+id/save_movie"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/plot"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="2dp"
+                android:layout_marginEnd="25dp"
+                android:layout_marginRight="25dp"
+                android:paddingRight="16dp"
+                android:text="Save"></Button>
         </RelativeLayout>
 
     </LinearLayout>
