@@ -14,3 +14,6 @@ The Movie Finder App is an Android application that allows users to search for m
 # API Configuration
 ### To use the OMDb API, you need to obtain an API key. Follow these steps to configure the API:
 - Visit the [OMDb API](https://www.omdbapi.com/) website and sign up for an API key.
+
+# APK
+[Download App APK](https://github.com/Wey4t/Movie/releases/tag/0.1)
